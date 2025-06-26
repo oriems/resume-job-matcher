@@ -1,75 +1,56 @@
 import streamlit as st
-from datetime import date
+import json
+from pathlib import Path
 
-# Step 1: Define your structured resume memory
-resume_memory = [
-    {
-        "company": "Norwest Venture Partners",
-        "title": "Senior Data Scientist",
-        "start": "2021-08",
-        "end": "2025-05",
-        "tools": ["Python", "dbt (seeds/models/snapshots)", "Dagster", "Tableau", "Metabase", "Sigma", "pydantic", "scikit-learn", "Hugging Face"],
-        "impact": [
-            "Created 10,000+ sourced leads with 20%+ investor conversation rate",
-            "Built scoring models with 30+ non-public features",
-            "Developed scalable pipelines across 80+ tables",
-            "Implemented LLMs to extract entities and improve search relevance"
-        ]
-    },
-    {
-        "company": "PitchBook Data",
-        "title": "Director, Data Science & Software Engineering",
-        "start": "2017-07",
-        "end": "2021-07",
-        "tools": ["Python", "AWS", "SQL", "Excel", "REST APIs", "Machine Learning", "JIRA", "Flask"],
-        "impact": [
-            "Increased data coverage by 60%, reduced headcount by ⅓",
-            "Led 10–30 person technical teams across 6 years",
-            "Built the automated sourcing engine pre-LLM tools",
-            "Implemented scalable ML and cloud microservices"
-        ]
-    }
-]
+# Load memory from file or fall back
+save_path = Path("resume_memory.json")
+if save_path.exists():
+    with open(save_path, "r") as f:
+        resume_memory = json.load(f)
+else:
+    resume_memory = []
 
-# Step 2: Start Streamlit app
 st.set_page_config(page_title="Resume Intelligence Tool", layout="wide")
+st.title("🧠 Resume Intelligence Tool")
 
-st.title("🧠 Resume Memory Viewer")
+# --- Navbar style selection ---
+view = st.radio("Navigation", ["Resume Viewer", "Job Matcher"], horizontal=True)
 
-# Sidebar navigation
-page = st.sidebar.selectbox("Select View", ["Resume Viewer", "Job Matcher"])
+if view == "Resume Viewer":
+    st.header("📄 Resume Viewer")
 
-# === Resume Viewer ===
-if page == "Resume Viewer":
-    st.header("📄 Resume Memory Viewer")
-    for job in resume_memory:
-        with st.expander(f"{job['title']} at {job['company']} ({job['start']} to {job['end']})"):
-            st.markdown("**Tools Used:** " + ", ".join(job["tools"]))
-            st.markdown("**Impact:**")
-            for bullet in job["impact"]:
-                st.markdown(f"- {bullet}")
+    # Sidebar list of jobs
+    job_labels = [f"{job['company']}\n{job['title']}\n{job['start_date']} - {job['end_date']}" for job in resume_memory]
+    selected_job = st.selectbox("Select a job to view/edit:", options=job_labels)
+    selected_index = job_labels.index(selected_job)
+    job = resume_memory[selected_index]
 
-# === Job Matcher ===
-elif page == "Job Matcher":
-    st.header("📌 Job Description Matcher")
-    jd_text = st.text_area("Paste a job description here", height=300)
+    st.subheader("✏️ Job Details")
 
-    if jd_text:
-        # Very basic keyword check for now
-        jd_keywords = [word.lower() for word in jd_text.split()]
-        match_score = 0
-        matched_tools = []
+    job["company"] = st.text_input("Company", value=job.get("company", ""))
+    job["title"] = st.text_input("Title", value=job.get("title", ""))
+    job["start_date"] = st.text_input("Start Date", value=job.get("start_date", ""))
+    job["end_date"] = st.text_input("End Date", value=job.get("end_date", ""))
 
-        for job in resume_memory:
-            for tool in job["tools"]:
-                if tool.lower() in jd_keywords:
-                    match_score += 1
-                    matched_tools.append(tool)
+    st.subheader("🛠 Tools Used")
+    tools = job.get("tools", {"advisor": [], "builder": [], "informed": []})
+    for role in ["advisor", "builder", "informed"]:
+        tools[role] = st.text_area(f"{role.capitalize()} Tools (comma-separated)", 
+                                   value=", ".join(tools.get(role, []))).split(",")
+        tools[role] = [t.strip() for t in tools[role] if t.strip()]
+    job["tools"] = tools
 
-        st.markdown(f"✅ **Tool Match Score:** {match_score}")
-        if matched_tools:
-            st.markdown("🔍 **Matched Tools from Your Resume:**")
-            st.write(", ".join(set(matched_tools)))
-        else:
-            st.markdown("❌ No direct tool matches found.")
-        
+    st.subheader("📌 Project Info")
+    project = job.get("project", {})
+    project["description"] = st.text_area("Project Description", value=project.get("description", ""))
+    project["impact"] = st.text_area("Impact (bullet points, new line per bullet)", 
+                                      value="\n".join(project.get("impact", []))).split("\n")
+    project["impact"] = [line.strip() for line in project["impact"] if line.strip()]
+    job["project"] = project
+
+    resume_memory[selected_index] = job
+
+    if st.button("💾 Save Changes"):
+        with open(save_path, "w") as f:
+            json.dump(resume_memory, f, indent=2)
+        st.success("Saved successfully!")

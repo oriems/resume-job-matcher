@@ -1,0 +1,42 @@
+[
+  {
+    "company": "Norwest Venture Partners",
+    "title": "Senior Data Scientist",
+    "start_date": "2021-08",
+    "end_date": "2025-05",
+    "tools": {
+      "builder": ["Python", "dbt", "Dagster", "Tableau", "Metabase", "Sigma", "pydantic", "scikit-learn", "Hugging Face"],
+      "advisor": [],
+      "informed": []
+    },
+    "project": {
+      "description": "Built VC sourcing infrastructure and ML pipelines for startup signal detection.",
+      "impact": [
+        "Created 10,000+ sourced leads with 20%+ investor conversation rate",
+        "Built scoring models with 30+ non-public features",
+        "Developed scalable pipelines across 80+ tables",
+        "Implemented LLMs to extract entities and improve search relevance"
+      ]
+    }
+  },
+  {
+    "company": "PitchBook Data",
+    "title": "Director, Data Science & Software Engineering",
+    "start_date": "2017-07",
+    "end_date": "2021-07",
+    "tools": {
+      "builder": ["Python", "AWS", "SQL", "Excel", "REST APIs", "Machine Learning", "JIRA", "Flask"],
+      "advisor": [],
+      "informed": []
+    },
+    "project": {
+      "description": "Led large-scale data science and engineering orgs focused on automation, scaling, and intelligence gathering.",
+      "impact": [
+        "Increased data coverage by 60%, reduced headcount by ⅓",
+        "Led 10–30 person technical teams across 6 years",
+        "Built the automated sourcing engine pre-LLM tools",
+        "Implemented scalable ML and cloud microservices"
+      ]
+    }
+  }
+]
